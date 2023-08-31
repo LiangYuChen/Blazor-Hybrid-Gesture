@@ -1,0 +1,127 @@
+﻿<div @onpointerdown="OnPointerStart" @onpointerdown:stopPropagation
+     @onpointerup="OnPointerEnd" @onpointerup:stopPropagation
+     @onpointercancel="OnPointerCancel" @onpointercancel:stopPropagation
+     @onpointermove="OnPointerMove" @onpointermove:stopPropagation>
+		@ChildContent
+</div>
+
+@code {
+    private double? _xDown;
+    private double? _yDown;
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public Action OnSwipeStart { get; set; }
+
+    [Parameter]
+    public Action<SwipeDirection> OnSwipe { get; set; }
+
+    [Parameter]
+    public Action<double, double> OnSwipeMove { get; set; }
+
+    [Parameter]
+    public Action OnSwipeCancel { get; set; }
+
+    [Parameter]
+    public double SwipeThreshold { get; set; } = 200;
+
+
+    #region pointer events
+    private void OnPointerStart(PointerEventArgs args)
+    {
+        SwipeStart(args.ClientX, args.ClientY);
+    }
+
+    private void OnPointerMove(PointerEventArgs args)
+    {
+        Swiping(args.ClientX, args.ClientY);
+    }
+
+    private void OnPointerEnd(PointerEventArgs args)
+    {
+        SwipeEnd(args.ClientX, args.ClientY);
+    }
+
+    private void OnPointerCancel(PointerEventArgs args)
+    {
+        SwipeCancel();
+    }
+    #endregion
+
+    #region swipe
+    private void SwipeStart(double x, double y)
+    {
+        _xDown = x;
+        _yDown = y;
+        InvokeAsync(() => OnSwipeStart());
+    }
+
+    private void Swiping(double x, double y)
+    {
+        if (_xDown == null || _yDown == null)
+        {
+            return;
+        }
+
+        var xDiff = x - _xDown.Value;
+        var yDiff = y - _yDown.Value;
+
+        InvokeAsync(() => OnSwipeMove(xDiff, yDiff));
+    }
+
+    private void SwipeEnd(double x, double y)
+    {
+        if (_xDown == null || _yDown == null)
+        {
+            return;
+        }
+
+        var xDiff = _xDown.Value - x;
+        var yDiff = _yDown.Value - y;
+
+        if (Math.Abs(xDiff) < SwipeThreshold && Math.Abs(yDiff) < SwipeThreshold)
+        {
+            _xDown = null;
+            _yDown = null;
+            InvokeAsync(() => OnSwipe(SwipeDirection.None));
+            return;
+        }
+
+        if (Math.Abs(xDiff) > Math.Abs(yDiff))
+        {
+            if (xDiff > 0)
+            {
+                InvokeAsync(() => OnSwipe(SwipeDirection.RightToLeft));
+            }
+            else
+            {
+                InvokeAsync(() => OnSwipe(SwipeDirection.LeftToRight));
+            }
+        }
+        else
+        {
+            if (yDiff > 0)
+            {
+                InvokeAsync(() => OnSwipe(SwipeDirection.BottomToTop));
+            }
+            else
+            {
+                InvokeAsync(() => OnSwipe(SwipeDirection.TopToBottom));
+            }
+        }
+
+        _xDown = null;
+        _yDown = null;
+    }
+
+    private void SwipeCancel()
+    {
+        _xDown = null;
+        _yDown = null;
+        
+        InvokeAsync(() => OnSwipeCancel());
+    }
+    #endregion
+}

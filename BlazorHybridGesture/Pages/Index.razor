@@ -1,0 +1,57 @@
+﻿@page "/"
+@using System.Text
+
+<h1>Hello, Gestures in Blazor!</h1>
+
+<SwipeArea OnSwipe="OnSwipe" OnSwipeMove="OnSwipeMove"
+           OnSwipeStart="ResetCardRefTransform" OnSwipeCancel="ResetCardRefTransform"
+           SwipeThreshold="@TendingThreshold">
+	<div class="swipe-target" style=@_swipeTargetTransform.ToString()>
+		<img src="img.jpg" alt="images" />
+	</div>
+</SwipeArea>
+
+
+@code {
+	private const double TendingThreshold = 80;
+	private SwipeDirection _swipeDirection = SwipeDirection.None;
+	private readonly StringBuilder _swipeTargetTransform = new StringBuilder(128);
+
+	private async void OnSwipe(SwipeDirection swipeDirection)
+	{
+		_swipeDirection = swipeDirection;
+
+		if(_swipeDirection == SwipeDirection.LeftToRight)
+		{
+
+		} 
+		else if (_swipeDirection == SwipeDirection.RightToLeft)
+		{
+
+		}
+
+		ResetCardRefTransform();
+	}
+
+
+	private void OnSwipeMove(double dX, double dY)
+	{
+		var dxInt = (int)dX;
+		var dyInt = (int)dY;
+		var rotate = (float)(dX * 0.1);
+
+		_swipeTargetTransform.Clear();
+		_swipeTargetTransform.Append($"--card-move-x:{dxInt}px;--card-move-y:{dyInt}px;--card-rotate-deg:{rotate}deg;");
+
+		InvokeAsync(StateHasChanged);
+	}
+
+	private void ResetCardRefTransform()
+	{
+		_swipeTargetTransform.Clear();
+		_swipeTargetTransform.Append("--card-move-x:0px;--card-move-y:0px;--card-rotate-deg:0deg;");
+
+		InvokeAsync(StateHasChanged);
+	}
+
+}
