@@ -1,7 +1,8 @@
-﻿<div @onpointerdown="OnPointerStart" @onpointerdown:stopPropagation
-     @onpointerup="OnPointerEnd" @onpointerup:stopPropagation
-     @onpointercancel="OnPointerCancel" @onpointercancel:stopPropagation
-     @onpointermove="OnPointerMove" @onpointermove:stopPropagation>
+﻿<div @onpointerdown="OnPointerStart"    @onpointerdown:stopPropagation      @onpointerdown:preventDefault
+     @onpointerup="OnPointerEnd"        @onpointerup:stopPropagation        @onpointerup:preventDefault
+     @onpointercancel="OnPointerCancel" @onpointercancel:stopPropagation    @onpointercancel:preventDefault
+     @onpointermove="OnPointerMove"     @onpointermove:stopPropagation      @onpointermove:preventDefault
+     style="touch-action: none">
 		@ChildContent
 </div>
 
